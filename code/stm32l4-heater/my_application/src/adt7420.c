@@ -46,7 +46,6 @@ ADT7420_STATUS adt7420_verify_setup(){
     return ADT7420_SUCCESS;
 }
 
-// TODO: fix this
 ADT7420_STATUS adt7420_read_temperature(float* temp){
     uint8_t temperature_data[2];
 
@@ -65,7 +64,6 @@ ADT7420_STATUS adt7420_read_temperature(float* temp){
         // MSB is set -> Negative Temperature
     	// Negative Temperature = (ADC Code (dec) – 65,536)/128
     	*temp = (float)( (temperature_raw - 65536) / 128 );
-
     } else {
         // MSB is not set -> Positive Temperature
     	// Positive Temperature = ADC Code (dec)/128

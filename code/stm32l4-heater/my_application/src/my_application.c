@@ -5,14 +5,7 @@
  * \version: 1.0
  */
 
-#include <stdio.h>
-#include <stdint.h>
-
 #include "my_application.h"
-#include "pid_controller.h"
-#include "interfaces_used.h"
-#include "heater.h"
-#include "adt7420.h"
 
 // ---------------------------------------------
 // PID related
@@ -23,14 +16,17 @@
 #define CONTROL_SIGNAL_MAX 100
 #define CONTROL_SIGNAL_MIN 0
 
-PID_Controller pid;
-float last_time_read;
+static PID_Controller pid;
+static float last_time_read;
 // ---------------------------------------------
+
+static uint32_t operation_init_time;
 
 // ---------------------------------------------
 /**
  * Redefinition of GPIO EXTI Callback in order to support the application specific
- * interrupt handlers
+ * interrupt handlers, this will handle the most part of the processing, when the MCU
+ * is not in the STOP mode
  */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
 	if (GPIO_Pin == ZC_DEC_Pin){
@@ -59,6 +55,20 @@ void my_application_init(float time, float target_value) {
     	// FIXME: determine how the application should behave
     	UNUSED(status);
     }
+
+    operation_init_time = HAL_GetTick();
+}
+
+bool time_to_sleep(){
+	// FIXME: In a real world application a timer would be a preferable choice
+	// it is only used for the easy of use as a PoC solution, a trade off,
+	// since it is the only calculation that is done in the while loop
+	if( (HAL_GetTick() - operation_init_time ) < OPER_MODE_DURATION_MS ){
+		HAL_Delay(10);		// Prevent "instantaneous" re-checking
+		return false;
+	}
+
+	return true;
 }
 
 void my_application_isr_handler() {
@@ -82,13 +92,13 @@ void my_application_isr_handler() {
 
     // Send temperature data to serial port for debugging
     char data[50];
-    sprintf(data, "Current temperature: %.2f\n", current_temperature);	// Create message
-    HAL_UART_Transmit(&UART_USED, (uint8_t*)&data, sizeof(data), 1000);	// Send message
+    sprintf(data, "Current temperature: %.2f\n", current_temperature);				// Create message
+    HAL_UART_Transmit(&UART_USED, (uint8_t*)&data, strlen(data), HAL_MAX_DELAY);	// Send message
 
     // ------------------------------------------------------------
     // Related to Question 3
     // ------------------------------------------------------------
-    // Time step from the previous read
+    // Time step from the previous read in ms
     float dt = ( last_time_read - HAL_GetTick() );
 
     // Calculate PID output      
@@ -96,4 +106,41 @@ void my_application_isr_handler() {
 
     // Control heater based on the PID output
     control_heater_set(control_signal);
+}
+
+void stop_mode(){
+	// FIXME: What is missing from this implementation?
+	// To set LPTIM or another timer to generate an event every
+	// TIMER_TICKS_REQUIRED ticks in order to resume from STOP mode
+
+	// Make sure that the heating element is turned off
+	control_heater_reset();
+
+	// Zero crossing control is achieved using an interrupt, hence, it is mandatory,
+	// in order to not alter the implementation, to disable interrupts before
+	// entering stop mode. We will resume from the STOP mode using Events
+	// Disable all interrupts
+	__disable_irq();
+
+	// Suspend the systick before going into stop mode
+	HAL_SuspendTick();
+
+	// Enter Stop Mode
+	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFE);
+
+	// Now we are in stop mode
+	// ...
+	// The code will continue
+	// its execution at the time we wake up
+
+	// Resume clocks
+	SystemClock_Config();
+	// Resume systick
+	HAL_ResumeTick();
+
+	// Enable all interrupts again
+	__enable_irq();
+
+	// To calculate the duration we are in operation mode
+	operation_init_time = HAL_GetTick();
 }

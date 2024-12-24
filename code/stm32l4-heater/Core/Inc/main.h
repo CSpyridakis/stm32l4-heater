@@ -59,6 +59,7 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define ZC_DET_Pin GPIO_PIN_11
 #define ZC_DET_GPIO_Port GPIOA
+#define ZC_DET_EXTI_IRQn EXTI15_10_IRQn
 #define HEATER_Pin GPIO_PIN_12
 #define HEATER_GPIO_Port GPIOA
 

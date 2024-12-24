@@ -8,6 +8,21 @@
 #ifndef MY_APPLICATION_H
 #define MY_APPLICATION_H
 
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
+
+#include "pid_controller.h"
+#include "interfaces_used.h"
+#include "heater.h"
+#include "adt7420.h"
+
+#define STOP_MODE_DURATION_SEC	( 2 /* hours */ * 60 /* minutes */ * 60 /* seconds */ )
+#define OPER_MODE_DURATION_MS	((uint32_t)( 1 /* hours */ * 60 /* minutes */ * 60 /* seconds */ * 1000 /* milliseconds */ ))
+#define TIMER_FREQ				( /* TBD */ )
+#define TIMER_TICKS_REQUIRED	( STOP_MODE_DURATION_SEC / TIMER_FREQ )
+
 /**
  * \brief: Initialize the application with a given start time and target temperature value.
  * 
@@ -30,5 +45,9 @@ void my_application_init(float time, float target_value);
  *          falling edges.
  */
 void my_application_isr_handler();
+
+bool time_to_sleep();
+
+void stop_mode();
 
 #endif // MY_APPLICATION_H

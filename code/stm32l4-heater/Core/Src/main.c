@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "i2c.h"
+#include "lptim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -90,6 +91,7 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART1_UART_Init();
+  MX_LPTIM2_Init();
   /* USER CODE BEGIN 2 */
   // ===================================================================
   // This is related to the actual application
@@ -105,7 +107,9 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	  if(time_to_sleep()){
+		  stop_mode();
+	  }
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

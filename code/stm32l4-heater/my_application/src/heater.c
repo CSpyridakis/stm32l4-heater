@@ -9,7 +9,7 @@
 
 #include "interfaces_used.h"
 
-void control_heater_activate_isr(void){
+void control_heater_activate(void){
 	HEATER_ACTIVATE();
 }
 
@@ -34,7 +34,7 @@ void control_heater_set(float control_signal){
 	*/
 	uint8_t half_cycle_duration_ms = (uint8_t)((1.0f / AC_FREQ) / 2.0f * 1000.0f);
 
-	// Calculate the duration to keep active heater, based on control_signal
+	// Calculate the duration to keep active the heater, based on the control_signal
 	// and the overall duration of a half cycle
 	//   Active time
 	//    ||
@@ -46,7 +46,7 @@ void control_heater_set(float control_signal){
 	uint8_t heater_active_time_ms = half_cycle_duration_ms * (uint8_t)control;
 
 
-	// Finally, calculate the actual delay in ms before activating the heater element for
+	// Finally, calculate the actual delay in ms before activating the heating element for
 	// the rest of the cycle
 	//
 	// Delay
@@ -58,6 +58,10 @@ void control_heater_set(float control_signal){
 	*/
 	uint8_t delay_until_heater_activation_ms = half_cycle_duration_ms - heater_active_time_ms;
 
-	// TODO: delay delay_until_heater_activation and then call control_heater_activate_isr
+	// FIXME: This is not recommended! Since we are already in a ISR, and it MUST be as short as
+	// possible, it is only used for the easy of use to demonstrate the implementation that is followed
+	HAL_Delay(delay_until_heater_activation_ms);
 
+	// Finally, for the rest time, activate the heater
+	control_heater_activate();
 }
