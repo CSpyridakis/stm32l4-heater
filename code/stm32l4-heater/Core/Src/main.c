@@ -76,12 +76,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  // ===================================================================
-  // This is related to the actual application
-  // ===================================================================
-  float target_temperature = 25.0f;
-  float initialization_time = 0.0f;
-  my_application_init(initialization_time, target_temperature);
+
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -96,6 +91,12 @@ int main(void)
   MX_I2C1_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  // ===================================================================
+  // This is related to the actual application
+  // ===================================================================
+  float target_temperature = 25.0f;
+  float initialization_time = 0.0f;
+  my_application_init(initialization_time, target_temperature);
 
   /* USER CODE END 2 */
 

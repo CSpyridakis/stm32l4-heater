@@ -1,4 +1,4 @@
-bject files
+# Object files
 *.o
 *.ko
 *.obj
@@ -30,9 +30,9 @@ bject files
 *.png
 
 # Eclipse CDT project files
-.cproject
-.project
-.settings/
+#.cproject
+#.project
+#.settings/
 
 # Vagrant directory
 .vagrant/
@@ -45,4 +45,4 @@ bject files
 /lib
 
 Debug/
-
+Release/
